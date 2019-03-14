@@ -3,28 +3,28 @@
 class LeafNode :
 	public Node
 {
+	friend std::ostream& operator<<(std::ostream&, const LeafNode&);
+
 	public:
-	//LeafNode(InnerNode*);
-	LeafNode(int*);
-	LeafNode(int*, InnerNode*);
+	LeafNode();
+	LeafNode(int, int*);
+	LeafNode(int, int*, InnerNode*);
 	virtual ~LeafNode();
 
 	public:
-	void Print() override;
+	void InsertKey(int) override;
 
-	size_t GetCKeys();
-	void SetCKeys(size_t);
+	InnerNode* GetPrecNode() const override;
+	void SetPrecNode(InnerNode*) override;
 
-	void InsertKey(int);
-
-	InnerNode* GetPrecNode();
-	void SetPrecNode(InnerNode*);
+	size_t GetCKeys() const;
+	int GetKey(size_t) const;
 	
 	private:
-	size_t ckeys;  //the number of the keys 
-	size_t ckeysMax;   //the max number of the keys
+	size_t m_ckeys;  //the number of the keys 
+	size_t m_ckeysMax;   //the max number of the keys
 
-	int *pKey;    //the pointer pointing to the keys contained in this node
+	int *m_piKeyArr;    //the pointer pointing to the keys contained in this node
 
 	InnerNode *m_pprecNode;
 };

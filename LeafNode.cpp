@@ -5,45 +5,21 @@
 #include <memory>
 #include <set>
 
-/*
-LeafNode::LeafNode(InnerNode *m_pprecNode) 
-{
-	ckeysMax = std::get<1>(Node::treeCur->GetNodeNum());
-	pKey = new int[ckeysMax];
-	m_pprecNode = m_pprecNode;
-}
-*/
-
-LeafNode::LeafNode(int *p) {
-	ckeysMax = std::get<1>(Node::treeCur->GetNodeNum());
-	pKey = p;
+LeafNode::LeafNode() {
+	m_ckeysMax = std::get<1>(Node::treeCur->GetNodeNum());
+	m_piKeyArr = new int[m_ckeysMax];
 }
 
-LeafNode::LeafNode(int *p, InnerNode *pprecNode): m_pprecNode(pprecNode){
-	ckeysMax = std::get<1>(Node::treeCur->GetNodeNum());
-	pKey = p;
+LeafNode::LeafNode(int ckeys, int *piarr): m_ckeys(ckeys), m_piKeyArr(piarr) {
+	m_ckeysMax = std::get<1>(Node::treeCur->GetNodeNum());
 }
 
-void LeafNode::Print(){
-	std::stringstream ss;
-	ss << "LeafNode->" << this << ": ";
-
-	for (size_t i = 0; i != ckeys; ++i) {
-		ss << pKey[i] << " < ";
-	}
-	ss.str().erase(ss.str().length() - 3);
-	ss << "   ";
-	std::cout << ss.str();
+LeafNode::LeafNode(int ckeys, int *piarr, InnerNode *pprecNode): m_ckeys(ckeys), m_piKeyArr(piarr), 
+				m_pprecNode(pprecNode){
+	m_ckeysMax = std::get<1>(Node::treeCur->GetNodeNum());
 }
 
-size_t LeafNode::GetCKeys() {
-	return ckeys;
-}
-void LeafNode::SetCKeys(size_t c) {
-	ckeys = c;
-}
-
-InnerNode* LeafNode::GetPrecNode() {
+InnerNode* LeafNode::GetPrecNode() const{
 	return m_pprecNode;
 }
 
@@ -51,51 +27,74 @@ void LeafNode::SetPrecNode(InnerNode *pnode) {
 	m_pprecNode = pnode;
 }
 
+size_t LeafNode::GetCKeys() const {
+	return m_ckeys;
+}
+
+int LeafNode::GetKey(size_t npos) const {
+	return m_piKeyArr[npos];
+}
+
 void LeafNode::InsertKey(int ikey) {
-	size_t ckeysNew = ckeys + 1;     //new ckeys
+	size_t ckeysNew = m_ckeys + 1;     //new m_ckeys
 
-	if (ckeysNew <= ckeysMax) {
-	    int *p = new int[ckeysMax];     //new array to store the result after inserted
-
-		for (size_t i = 0; i != ckeys; ++i) {
-			if (pKey[i] <= ikey) ++i;
-			else {
-				auto p1 = std::uninitialized_copy(pKey, pKey + i, p);
-				*(++p1) = ikey;
-				std::uninitialized_copy(pKey + i, pKey + ckeysMax - 1, p1);
-				break;
+	//the keys number of this node is in limit
+	if (ckeysNew <= m_ckeysMax) {
+		size_t nPosInrt = m_ckeys;
+		while (nPosInrt != 0)
+		{
+			if (m_piKeyArr[nPosInrt - 1] > ikey) {
+				m_piKeyArr[nPosInrt] = m_piKeyArr[nPosInrt - 1];
+				--nPosInrt;
+				continue;
 			}
+			break;
 		}
-		delete[]pKey;
-		pKey = p;
+		m_piKeyArr[nPosInrt] = ikey;
+
+		m_ckeys = ckeysNew;
 	}
 	else {
 		size_t ckeys = ckeysNew / 2, ckeys1 = ckeysNew - ckeys;
 		std::set<int> s;
-		for (size_t i = 0; i != ckeysMax; ++i) {
-			s.insert(pKey[i]);
+		for (size_t i = 0; i != m_ckeys; ++i) {
+			s.insert(m_piKeyArr[i]);
 		}
 		s.insert(ikey);
 
-		int *p1 = new int[ckeysMax], *p2 = new int[ckeysMax];
+		int *piarr = new int[m_ckeysMax], *piarr1 = new int[m_ckeysMax];
 		auto b = s.cbegin(), e = s.cend();
 		for (size_t i = 0; i != ckeys; ++i) {
-			p1[i] = *b;
+			piarr[i] = *b;
 			++b;
 		}
 		for (size_t j = 0; j != ckeys1; ++j) {
-			p2[j] = *b;
+			piarr1[j] = *b;
 			++b;
 		}
 
-		delete[]pKey;
-		pKey = p1;
+		delete[]m_piKeyArr;
+		m_piKeyArr = piarr;
+		m_ckeys = ckeys;
 
-		m_pprecNode->InsertNode(new LeafNode(p2), p2[0]);
+		m_pprecNode->InsertChldNode(new LeafNode(ckeys1, piarr1), piarr1[0]);
 	}
 }
 
 LeafNode::~LeafNode()
 {
-	delete[]pKey;
+	delete[]m_piKeyArr;
+}
+
+std::ostream& operator<<(std::ostream &os, const LeafNode &node) {
+	os << "LeafNode " << &node << ": ";
+
+	size_t i = 0, imax = node.GetCKeys();
+	while (i != imax - 1)
+	{
+		os << node.GetKey(i) << " < ";
+		++i;
+	}
+	os << node.GetKey(imax - 1);
+	return os;
 }

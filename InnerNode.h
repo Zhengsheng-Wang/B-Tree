@@ -3,31 +3,32 @@
 class InnerNode :
 	public Node
 {
+	friend std::ostream& operator<<(std::ostream &, const InnerNode&);
+
 	public:
 	InnerNode();
+	InnerNode(int, int*, Node**);
 	virtual ~InnerNode();
 
 	public:
-	void Print() override;
+	Node* GetChldNode(size_t) const;    //get the child node pointer in given position
+	size_t GetKey(size_t) const;
 
-	public:
-	size_t GetCNodes();
-	void SetCNodes(size_t);
-	
-	Node* GetChldNode(size_t);    //get the child node pointer in given position
+	void InsertKey(int) override;      //insert key
+	void InsertChldNode(Node*, int ikey);     //insert a new child node
 
-	void InsertNode(Node*, int ikey);     //insert a new child node
+	size_t GetCChldNodes() const;
 
-	InnerNode *GetPrecNode();
-	void SetPrecNode(InnerNode*);
+	InnerNode *GetPrecNode() const override;
+	void SetPrecNode(InnerNode*) override;
 
 	private:
-	size_t cnodes;    //current nodes number
-	size_t cnodesMax;  //max nodes number
+	size_t m_cnodes;    //current nodes number
+	size_t m_cnodesMax;  //max nodes number
 
-	int *pKey;           //pointer to the range key
+	int *m_piKeyArr;           //pointer to the range key
 
-	Node **m_pChldNode;    //pointer to the child node
-	InnerNode *m_pprecNode;
+	Node **m_pChldNodeArr;    //pointer to the child node array
+	InnerNode *m_pprecNode;  //pointer to the prec node
 };
 

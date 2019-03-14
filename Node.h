@@ -5,6 +5,7 @@
 #include <deque>
 
 class Tree;
+class InnerNode;
 class Node
 {
 	public:
@@ -12,7 +13,10 @@ class Node
 	virtual ~Node();
 
 	public:
-	virtual void Print() = 0;     
+	virtual void InsertKey(int) = 0;
+
+	virtual InnerNode* GetPrecNode() const = 0;
+	virtual void SetPrecNode(InnerNode*) = 0;
 
 	public:
 	static Tree *treeCur;
